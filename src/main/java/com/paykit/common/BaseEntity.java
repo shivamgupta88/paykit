@@ -1,5 +1,6 @@
 package com.paykit.common;
 
+import com.paykit.tenant.TenantEntityListener;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @MappedSuperclass
+@EntityListeners(TenantEntityListener.class)
 public abstract class BaseEntity {
 
     @Id
