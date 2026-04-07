@@ -10,5 +10,7 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
 
     Optional<Payment> findByTenantIdAndRazorpayPaymentId(UUID tenantId, String razorpayPaymentId);
 
+    Optional<Payment> findByRazorpayOrderId(String razorpayOrderId);
+
     List<Payment> findAllByInvoiceId(UUID invoiceId);
 }

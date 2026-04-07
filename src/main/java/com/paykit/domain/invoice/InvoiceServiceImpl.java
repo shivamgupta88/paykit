@@ -3,6 +3,7 @@ package com.paykit.domain.invoice;
 import com.paykit.common.AppConstants;
 import com.paykit.domain.customer.Customer;
 import com.paykit.domain.customer.CustomerRepository;
+import com.paykit.domain.email.EmailService;
 import com.paykit.domain.invoice.dto.CreateInvoiceItemRequest;
 import com.paykit.domain.invoice.dto.CreateInvoiceRequest;
 import com.paykit.domain.invoice.dto.InvoiceResponse;
@@ -30,6 +31,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final CustomerRepository customerRepository;
     private final InvoiceMapper invoiceMapper;
+    private final EmailService emailService;
 
     private static final Map<InvoiceStatus, Set<InvoiceStatus>> TRANSITIONS = new EnumMap<>(InvoiceStatus.class);
 
@@ -134,6 +136,20 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         invoice.setStatus(target);
         invoice = invoiceRepository.save(invoice);
+
+        if (target == InvoiceStatus.SENT) {
+            Customer customer = customerRepository.findById(invoice.getCustomerId()).orElse(null);
+            if (customer != null) {
+                emailService.sendInvoiceEmail(
+                        customer.getEmail(),
+                        "Invoice " + invoice.getInvoiceNumber() + " from PayKit",
+                        "You have received invoice " + invoice.getInvoiceNumber()
+                                + ". Amount due: " + invoice.getCurrency() + " " + invoice.getTotalAmount()
+                                + ". Due date: " + invoice.getDueDate()
+                );
+            }
+        }
+
         return invoiceMapper.toResponse(invoice);
     }
 
