@@ -14,6 +14,7 @@ import com.paykit.exception.DuplicateResourceException;
 import com.paykit.exception.ResourceNotFoundException;
 import com.paykit.security.JwtService;
 import com.paykit.tenant.TenantContext;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
+    @Timed(value = "paykit.auth.register", description = "Time to register a user")
     public AuthResponse register(RegisterRequest request) {
         Tenant tenant = tenantRepository.findById(request.getTenantId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant", request.getTenantId()));
@@ -66,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(readOnly = true)
+    @Timed(value = "paykit.auth.login", description = "Time to login a user")
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByTenantIdAndEmail(request.getTenantId(), request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));

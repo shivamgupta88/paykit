@@ -16,6 +16,9 @@ import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -42,6 +45,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
+    @CircuitBreaker(name = "razorpay")
+    @Retry(name = "razorpay")
+    @Timed(value = "paykit.payment.initiate", description = "Time to initiate a payment")
     public PaymentResponse initiatePayment(CreatePaymentRequest request) {
         UUID tenantId = TenantContext.get();
 
@@ -79,6 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
+    @Timed(value = "paykit.payment.verify", description = "Time to verify a payment")
     public PaymentResponse verifyPayment(VerifyPaymentRequest request) {
         UUID tenantId = TenantContext.get();
 

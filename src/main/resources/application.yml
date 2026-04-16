@@ -68,3 +68,21 @@ paykit:
     key-id: ${RAZORPAY_KEY_ID:}
     key-secret: ${RAZORPAY_KEY_SECRET:}
     webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
+  rate-limit:
+    requests-per-minute: ${RATE_LIMIT_RPM:30}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      razorpay:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+  retry:
+    instances:
+      razorpay:
+        max-attempts: 3
+        wait-duration: 1s

@@ -11,6 +11,7 @@ import com.paykit.domain.invoice.dto.UpdateInvoiceStatusRequest;
 import com.paykit.exception.InvalidStateTransitionException;
 import com.paykit.exception.ResourceNotFoundException;
 import com.paykit.tenant.TenantContext;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional
+    @Timed(value = "paykit.invoice.create", description = "Time to create an invoice")
     public InvoiceResponse create(CreateInvoiceRequest request) {
         UUID tenantId = TenantContext.get();
 
@@ -124,6 +126,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional
+    @Timed(value = "paykit.invoice.update-status", description = "Time to update invoice status")
     public InvoiceResponse updateStatus(UUID id, UpdateInvoiceStatusRequest request) {
         Invoice invoice = findByIdAndTenant(id);
         InvoiceStatus current = invoice.getStatus();
