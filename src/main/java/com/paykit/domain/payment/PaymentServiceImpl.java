@@ -6,6 +6,7 @@ import com.paykit.domain.email.EmailService;
 import com.paykit.domain.invoice.Invoice;
 import com.paykit.domain.invoice.InvoiceRepository;
 import com.paykit.domain.invoice.InvoiceStatus;
+import com.paykit.domain.wallet.WalletService;
 import com.paykit.domain.payment.dto.CreatePaymentRequest;
 import com.paykit.domain.payment.dto.PaymentResponse;
 import com.paykit.domain.payment.dto.VerifyPaymentRequest;
@@ -42,6 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final RazorpayProperties razorpayProperties;
     private final PaymentMapper paymentMapper;
     private final EmailService emailService;
+    private final WalletService walletService;
 
     @Override
     @Transactional
@@ -76,7 +78,9 @@ public class PaymentServiceImpl implements PaymentService {
             payment.setStatus(PaymentStatus.INITIATED);
 
             payment = paymentRepository.save(payment);
-            return paymentMapper.toResponse(payment);
+            PaymentResponse response = paymentMapper.toResponse(payment);
+            response.setKeyId(razorpayProperties.getKeyId());
+            return response;
         } catch (RazorpayException e) {
             log.error("Failed to create Razorpay order for invoice {}", invoice.getInvoiceNumber(), e);
             throw new PaymentProcessingException("Failed to create payment order", e);
@@ -178,6 +182,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
         invoice.setStatus(InvoiceStatus.PAID);
         invoiceRepository.save(invoice);
+        walletService.creditFromPayment(tenantId, invoice.getTotalAmount());
 
         Customer customer = customerRepository.findById(invoice.getCustomerId()).orElse(null);
         if (customer != null) {

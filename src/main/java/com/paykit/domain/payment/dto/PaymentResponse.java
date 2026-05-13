@@ -16,6 +16,7 @@ public class PaymentResponse {
     private UUID invoiceId;
     private String razorpayOrderId;
     private String razorpayPaymentId;
+    private String keyId;
     private BigDecimal amount;
     private String currency;
     private PaymentStatus status;

@@ -8,7 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +26,7 @@ import static com.paykit.common.AppConstants.MAX_PAGE_SIZE;
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
+    private final InvoicePdfService invoicePdfService;
 
     @PostMapping
     public ResponseEntity<InvoiceResponse> create(@Valid @RequestBody CreateInvoiceRequest request) {
@@ -52,5 +56,15 @@ public class InvoiceController {
     public ResponseEntity<InvoiceResponse> updateStatus(@PathVariable UUID id,
                                                         @Valid @RequestBody UpdateInvoiceStatusRequest request) {
         return ResponseEntity.ok(invoiceService.updateStatus(id, request));
+    }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable UUID id) {
+        byte[] pdfBytes = invoicePdfService.generatePdf(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(
+                ContentDisposition.attachment().filename("invoice-" + id + ".pdf").build());
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 }
