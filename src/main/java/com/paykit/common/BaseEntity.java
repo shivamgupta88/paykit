@@ -36,7 +36,7 @@ public abstract class BaseEntity {
     private UUID updatedBy;
 
     @Version
-    private Long version;
+    private Long version = 0L;
 
     @PrePersist
     protected void onCreate() {
