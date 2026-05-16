@@ -33,13 +33,15 @@ spring:
       port: ${REDIS_PORT:6379}
 
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
+    host: ${MAIL_HOST:smtp.resend.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:resend}
     password: ${MAIL_PASSWORD:}
     properties:
       mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
+      mail.smtp.ssl.enable: ${MAIL_SSL:true}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:false}
+    from: ${MAIL_FROM:onboarding@resend.dev}
 
   cache:
     type: redis
